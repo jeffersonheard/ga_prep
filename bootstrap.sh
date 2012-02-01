@@ -15,4 +15,5 @@ tar -xzf pycairo-1.8.8.tar.gz
 cd pycairo-1.8.8
 ./configure
 make && make install
+cd ../..
 pip install `cat requirements.txt | egrep -v "^#" | tr "\n" " "`
