@@ -4,9 +4,9 @@
 
 mkdir custom
 cd custom
-wget http://cairographics.org/releases/py2cairo-1.8.8.tar.gz
-tar -xzf py2cairo-1.8.8.tar.gz
-cd py2cairo-1.10.0
+wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
+tar -xzf pycairo-1.8.8.tar.gz
+cd pycairo-1.8.8
 ./configure
 make && make install
 

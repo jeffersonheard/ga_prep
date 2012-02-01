@@ -26,11 +26,13 @@ def main():
         subprocess.call(["virtualenv", "--clear", "--distribute", virtualenv])
     file_path = os.path.dirname(__file__)
 
-    pip_args = ["pip", "install", "-E", virtualenv, "--requirement",
-        os.path.join(file_path, "requirements.txt")]
+    pip_args = ["pip"]
 
     if 'HTTP_PROXY' in os.environ:
         pip_args.append("--proxy='" + os.environ['HTTP_PROXY'] + "'")
+
+    pip_args.extend(["install", "-E", virtualenv, "--requirement",
+        os.path.join(file_path, "requirements.txt")])
 
     if options.upgrade:
         pip_args.append("--upgrade")
