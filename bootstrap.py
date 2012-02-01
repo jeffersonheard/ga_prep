@@ -29,6 +29,9 @@ def main():
     pip_args = ["pip", "install", "-E", virtualenv, "--requirement",
         os.path.join(file_path, "requirements.txt")]
 
+    if 'HTTP_PROXY' in os.environ:
+        pip_args.append("--proxy='" + os.environ['HTTP_PROXY'] + "'")
+
     if options.upgrade:
         pip_args.append("--upgrade")
 
