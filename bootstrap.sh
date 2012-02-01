@@ -16,4 +16,24 @@ cd pycairo-1.8.8
 ./configure
 make && make install
 cd ../..
-pip install `cat requirements.txt | egrep -v "^#" | tr "\n" " "`
+
+pip install Django>=1.3,<1.4
+pip install fabric
+pip install gunicorn
+pip install gdal
+pip install numpy
+pip install numpy # this is not redundant, surprisingly.  scipy won't install unless you do this twice.
+pip install numpy
+pip install scipy
+pip install psycopg2
+pip install pyke
+pip install shapely
+pip install mongoengine
+pip install pymongo
+pip install celery
+pip install django-celery
+pip install ipython
+pip install NetCDF4
+pip install cython
+pip install numexpr
+pip install tables
