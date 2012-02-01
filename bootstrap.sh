@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z $VIRTUAL_ENV ]; then
+    source ../bin/activate
+fi
+
 if [ -n $HTTP_PROXY ]; then
     alias pip=pip --proxy=$HTTP_PROXY
 fi
