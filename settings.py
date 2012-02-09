@@ -20,6 +20,49 @@ DATABASES = {
     }
 }
 
+### Celery Settings
+#
+BROKER_URL='amqp://geoanalytics:geoanalytics@localhost:5672' # if the broker is running on another machine, change this.  If you have a distributed setup, your other machines' will need to change to use the central broker.
+CELERY_RESULT_BACKEND='amqp'
+CELERY_TASK_RESULT_EXPIRES=3600 # Task results expire in one hour if they are unconsumed.  
+
+# For more on the following settings, see http://celery.readthedocs.org/en/latest/userguide/routing.html
+#CELERY_QUEUES={ 
+#    'default' : { 'exchange' : 'default', 'binding_key' : 'default' },
+#    'irods' : { 'exchange' : 'irods', 'binding_key' : 'irods.ibatch' },
+#}
+#CELERY_DEFAULT_QUEUE='default'
+#CELERY_DEFAULT_EXCHANGE='tasks'
+#CELERY_DEFAULT_EXCHANGE_TYPE='topic'
+#CELERY_DEFAULT_ROUTING_KEY='task.default'
+#
+#class MyRouter(object):
+#    def route_for_task(self, task, args=None, kwargs=None):
+#         """Rewrite this to do complex task routing"""
+#         if task == "myapp.tasks.compress_video":
+#              return {"exchange": "video",
+#                      "exchange_type": "topic",
+#                      "routing_key": "video.compress"}
+#         return None
+#
+#CELERY_ROUTES=(MyRouter(),} # uncomment this line if you're uysing the MyRouter class.
+#CELERY_ROUTES=({"ga_irods.tasks.ibatch": {
+#                        "queue": "irods",
+#                        "routing_key": "irods.ibatch"
+#                 }}, )
+
+### IRODS Settings.  Use if ga_irods is installed.  IRODS must be installed on
+# the same machine running celeryd with the queue that processes IRODS commands.
+# by default, this is 'default', but it can be configured using the Celery settings 
+# above.
+#
+#ICOMMANDS_PATH=/opt/local/irods/clients/icommands/bin
+
+### Descartes settings.  Use if ga_descartes is installed.
+# 
+# This is the path that descartes writes all rule bases to.  
+#RULE_ROOT=/opt/django/ga/current/rules
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -105,6 +148,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    '/opt/django/apps/ga/v0.1//lib/python2.7/site-packages/django/contrib/gis/templates'
 )
 
 INSTALLED_APPS = (
@@ -117,7 +161,16 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     
-    'ga_ows'
+    # Geoanalytics components. Uncomment to install
+    'tastypie',			# Simple RESTful API. Install ga_tastypie extensions from the src directory as well.
+    'ga_ows',			# WFS, WMS, (WCS will come as well as SOS) services. WMS Caching requires MongoDB.
+    # 'ga_irods',		# IRODS celery task support
+    # 'ga_descartes',		# Pyke inference engine with Geoanalytics extensions.  Used for dynamic application configuration or whatever else you find useful.  http://pyke.sourceforge.net
+    # 'ga_datacube',		# 5-D regular gridded data. Requires MongoDB.
+    # 'ga_sensorcollection',	# Metadata rich sensor collections. Requires MongoDB.
+    # 'ga_pyramid',		# Image pyramids.  Requires MongoDB
+
+    # Custom applications go below this line
 )
 
 # A sample logging configuration. The only tangible logging
@@ -150,7 +203,6 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-            'filters': ['special']
         }
     },
     'loggers': {
@@ -160,7 +212,7 @@ LOGGING = {
             'level':'INFO',
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console'],
             'level': 'ERROR',
             'propagate': False,
         }

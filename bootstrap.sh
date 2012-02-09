@@ -32,6 +32,7 @@ pip install mongoengine
 pip install pymongo
 pip install celery
 pip install django-celery
+pip install django-tastypie
 pip install ipython
 pip install NetCDF4
 pip install cython
