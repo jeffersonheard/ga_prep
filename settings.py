@@ -162,6 +162,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     
     # Geoanalytics components. Uncomment to install
+    'mongotools',		# Adding stuff to mongoengine that makes it work a little closer in conjunction with Django https://github.com/wpjunior/django-mongotools
+    'djcelery',			# Adding Django celery application
     'tastypie',			# Simple RESTful API. Install ga_tastypie extensions from the src directory as well.
     'ga_ows',			# WFS, WMS, (WCS will come as well as SOS) services. WMS Caching requires MongoDB.
     # 'ga_irods',		# IRODS celery task support
