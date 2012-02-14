@@ -17,7 +17,7 @@ cd pycairo-1.8.8
 make && make install
 cd ../..
 
-pip install Django>=1.3,<1.4
+pip install Django
 pip install fabric
 pip install gunicorn
 pip install gdal
