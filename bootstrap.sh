@@ -38,3 +38,4 @@ pip install NetCDF4
 pip install cython
 pip install numexpr
 pip install tables
+pip install rpy2
