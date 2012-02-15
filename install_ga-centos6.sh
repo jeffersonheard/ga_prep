@@ -20,20 +20,20 @@ if [ "$1" != "skip-packages" ]; then
 rpm -Uvh http://download.fedora.redhat.com/pub/epel/6/i386/epel-release-6-5.noarch.rpm
 rpm -Uvh http://elgis.argeo.org/repos/6/elgis-release-6-6_0.noarch.rpm
 yum -y update
-yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel
-yum -y install readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip
-yum -y install gdal geos grass libspatialite osm2pgrouting postgis proj 
-yum -y install gdal-devel geos-devel grass-devel libspatialite-devel proj-devel 
-yum -y install R-core R-devel
-yum -y install mongo-10gen mongo-10gen-server
-yum -y install rabbitmq-server
 yum -y groupinstall "Development Tools"
-yum -y install git
+yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel \ 
+       ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel \
+       bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass \
+       libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel \
+       proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server \
+       rabbitmq-server git
 fi
 
 # add django user and create skeleton
+if [ ! -d /opt/django ]; then
 useradd -d /opt/django -m -r django
 passwd django
+fi
 
 mkdir -p /opt/django
 mkdir -p /opt/django/apps
