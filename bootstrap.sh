@@ -13,7 +13,7 @@ cd custom
 wget http://cairographics.org/releases/pycairo-1.8.8.tar.gz
 tar -xzf pycairo-1.8.8.tar.gz
 cd pycairo-1.8.8
-./configure
+./configure --prefix=/opt/django/apps/ga/v0.1
 make && make install
 cd ../..
 
