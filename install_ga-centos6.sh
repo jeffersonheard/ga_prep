@@ -24,6 +24,20 @@ yum -y groupinstall "Development Tools"
 yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server rabbitmq-server git atlas-devel atlas-devel gcc-gfortran atlas
 fi
 
+#The GDAL RPM is currently broken for building the python extns, so we have to install GDAL 1.8.1 from source into /usr/local
+curl http://download.osgeo.org/gdal/gdal-1.8.1.tar.gz | tar -xz
+cd gdal-1.8.1
+./configure
+make -j2 && make install
+cd ..
+rm -rf gdal-1.8.1
+
+# Since we're using /usr/local, we need to update the PATH and LD_LIBRARY_PATH
+echo 'export PATH=/usr/local/bin:$PATH' >> /etc/profile
+echo 'export PYTHONPATH=/usr/lib64/grass-6.4.1/etc/python:$PYTHONPATH' >> /etc/profile
+echo 'export LD_LIBRARY_PATH=/usr/local/bin:$LD_LIBRARY_PATH' >> /etc/profile
+source /etc/profile
+
 # add django user and create skeleton
 if [ ! -d /opt/django ]; then
 useradd -d /opt/django -m -r django
@@ -139,4 +153,20 @@ chkconfig supervisord on
 # make sure django is owned by its own user
 chown -R django:users /opt/django
 /etc/init.d/postgresql initdb
+sed "s/ident$/trust/g" < /var/lib/pgsql/data/pg_hba.conf > /tmp/pg_hba.conf
+cp /tmp/pg_hba.conf /var/lib/pgsql/data/
 /etc/init.d/postgresql start
+
+# create postgis database
+createdb template_postgis -U postgres
+psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';" -U postgres
+psql -d template_postgis -f $POSTGIS_SQL_PATH/postgis.sql -U postgres# Loading the PostGIS SQL routines
+psql -d template_postgis -f $POSTGIS_SQL_PATH/spatial_ref_sys.sql -U postgres
+psql -d template_postgis -c "GRANT ALL ON geometry_columns TO PUBLIC;" -U postgres # Enabling users to alter spatial tables.
+psql -d template_postgis -c "GRANT ALL ON geography_columns TO PUBLIC;" -U postgres
+psql -d template_postgis -c "GRANT ALL ON spatial_ref_sys TO PUBLIC;" -U postgres
+createuser -s -P geoanalytics  -U postgres
+createdb -T template_postgis geoanalytics -U geoanalytics
+
+# create celery queues
+
