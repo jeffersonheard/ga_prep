@@ -21,7 +21,7 @@ rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-5.noar
 rpm -Uvh http://elgis.argeo.org/repos/6/elgis-release-6-6_0.noarch.rpm
 yum -y update
 yum -y groupinstall "Development Tools"
-yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server rabbitmq-server git atlas-devel atlas-devel gcc-gfortran atlas python-devel gdal-python
+yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server rabbitmq-server git atlas-devel atlas-devel gcc-gfortran atlas python-devel gdal-python libxml2-devel
 fi
 
 #The GDAL RPM is currently broken for building the python extns, so we have to install GDAL 1.8.1 from source into /usr/local
