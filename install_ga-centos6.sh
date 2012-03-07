@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -n $HTTP_PROXY ]; then
+if [ -n "$HTTP_PROXY" ]; then
    alias pip=pip --proxy=$HTTP_PROXY
 fi 
 
@@ -10,32 +10,42 @@ echo "[10gen]" > /etc/yum.repos.d/10gen.repo
 echo "name=10gen Repository" >> /etc/yum.repos.d/10gen.repo
 echo "baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64" >> /etc/yum.repos.d/10gen.repo
 echo "gpgcheck=0" >> /etc/yum.repos.d/10gen.repo
-if [ -n $HTTP_PROXY ]; then
+if [ -n "$HTTP_PROXY" ]; then
+	echo "Adding proxy"
 	echo "proxy=$HTTP_PROXY" >> /etc/yum.repos.d/10gen.repo
 fi
 fi
 
+echo "Install necessary RPMs [y/n]? "
+read install_rpms
+
+if [ $install_rpms == "y" ] || [ $install_rpms == "Y" ]; then
 # install RPMs
-if [ "$1" != "skip-packages" ]; then
-rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-5.noarch.rpm
-rpm -Uvh http://elgis.argeo.org/repos/6/elgis-release-6-6_0.noarch.rpm
-yum -y update
-yum -y groupinstall "Development Tools"
-yum -y install postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server rabbitmq-server git atlas-devel atlas-devel gcc-gfortran atlas python-devel gdal-python libxml2-devel libxslt-devel
+	rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-5.noarch.rpm
+	rpm -Uvh http://elgis.argeo.org/repos/6/elgis-release-6-6_0.noarch.rpm
+	yum -y update
+	yum -y groupinstall "Development Tools"
+	yum -y install curl wget postgresql postgresql-server postgresql-contrib postgresql-devel readline-devel ncurses-devel libevent-devel glib2-devel libjpeg-devel freetype-devel bzip2 bzip2-devel bzip2-libs openssl-devel pcre pcre-devel gpg make gcc yum-utils unzip gdal geos grass libspatialite osm2pgrouting postgis proj gdal-devel geos-devel grass-devel libspatialite-devel proj-devel hdf5-devel hdf5 netcdf netcdf-devel R-core R-devel mongo-10gen mongo-10gen-server rabbitmq-server git atlas-devel atlas-devel gcc-gfortran atlas python-devel gdal-python libxml2-devel libxslt-devel
 fi
 
 #The GDAL RPM is currently broken for building the python extns, so we have to install GDAL 1.8.1 from source into /usr/local
-curl http://download.osgeo.org/gdal/gdal-1.8.1.tar.gz | tar -xz
-cd gdal-1.8.1
+curl http://download.osgeo.org/gdal/gdal-1.9.0.tar.gz | tar -xz
+cd gdal-1.9.0
 ./configure
 make -j2 && make install
 cd ..
-rm -rf gdal-1.8.1
+rm -rf gdal-1.9.0
 
+echo "Update /etc/profile [y/n]? "
+read update_profile
+
+if [ $update_profile == 'y' ] || [ $update_profile == "Y" ]; then
 # Since we're using /usr/local, we need to update the PATH and LD_LIBRARY_PATH
 echo 'export PATH=/usr/local/bin:$PATH' >> /etc/profile
 echo 'export PYTHONPATH=/usr/lib64/grass-6.4.1/etc/python:$PYTHONPATH' >> /etc/profile
-echo 'export LD_LIBRARY_PATH=/usr/local/bin:$LD_LIBRARY_PATH' >> /etc/profile
+echo 'export LD_LIBRARY_PATH=/usr/local/lib/:/usr/local/lib64/:/usr/local/bin:$LD_LIBRARY_PATH' >> /etc/profile
+echo "export PATH=$PATH:/usr/local/bin:/usr/local/sbin" >> /etc/profile
+fi
 source /etc/profile
 
 # add django user and create skeleton
@@ -61,12 +71,8 @@ mkdir -p /opt/django/configs/nginx
 mkdir -p /opt/django/configs/supervisord
 mkdir -p /opt/django/apps/ga
 
+echo "source apps/ga/current/bin/activate" >> /opt/django/.bash_profile
 echo "<html><body>nothing here</body></html> " > /opt/django/htdocs/index.html
-
-# update bash profile to look at /usr/local/*
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/:/usr/local/lib64/" >> /etc/profile
-echo "export PATH=$PATH:/usr/local/bin:/usr/local/sbin" >> /etc/profile
-source /etc/profile
 
 # download pip and distribute 
 mkdir -p /tmp/downloads
@@ -101,10 +107,8 @@ touch /opt/django/apps/ga/v0.1/.venv
 
 # grab geoanalytics from GitHub
 cd /opt/django/apps/ga/v0.1/
-curl -L "https://github.com/JeffHeard/ga_prep/zipball/master" > ga.zip
-unzip ga.zip
-mv JeffHeard* ga
-rm ga.zip
+git clone git://github.com/JeffHeard/ga_prep
+mv ga_prep ga
 
 # setup configuration files and paths
 ln -s /opt/django/apps/ga/v0.1 /opt/django/apps/ga/current
@@ -119,13 +123,15 @@ sh bootstrap.sh
 # install geoanalytics apps from GitHub
 mkdir -p /opt/django/apps/ga/src
 cd /opt/django/apps/ga/src
-curl -L "https://github.com/JeffHeard/ga_ows/zipball/master" > ga_ows.zip
-unzip ga_ows.zip
-mv JeffHeard* ga_ows
-rm ga.zip
-cd ga_ows
+git clone git://github.com/JeffHeard/ga_ows
+git clone git://github.com/JeffHeard/ga_pyramid
+cd ga_ows 
 python setup.py install
+cd ../ga_pyramid
+python setup.py install
+cd ..
 
+# install django-mongotools
 mkdir -p /tmp/downloads
 cd /tmp/downloads
 curl -L https://github.com/wpjunior/django-mongotools/zipball/master > django-mongotools.zip
@@ -152,13 +158,28 @@ chkconfig supervisord on
 
 # make sure django is owned by its own user
 chown -R django:users /opt/django
+
+echo "Do you want to setup PostGIS on this machine [y/n]? "
+echo "You will need at least one PostGIS instance.  Large installations will want"
+echo "a clustered postgresql setup, which can only be provided via custom setup."
+echo "If you have your own PostGIS already, you can safely answer n here."
+echo ""
+read setup_postgis
+
+if [ $setup_postgis == 'y' ] || [ $setup_postgis == 'Y' ]; then
+
+# create postgis database
 /etc/init.d/postgresql initdb
 sed "s/ident$/trust/g" < /var/lib/pgsql/data/pg_hba.conf > /tmp/pg_hba.conf
 cp /tmp/pg_hba.conf /var/lib/pgsql/data/
 /etc/init.d/postgresql start
 
-# create postgis database
+chkconfig --add postgresql
+chkconfig postgresql on
+
+POSTGIS_SQL_PATH=/usr/share/pgsql/contrib
 createdb template_postgis -U postgres
+createlang plpgsql template_postgis -U postgres
 psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';" -U postgres
 psql -d template_postgis -f $POSTGIS_SQL_PATH/postgis.sql -U postgres # Loading the PostGIS SQL routines
 psql -d template_postgis -f $POSTGIS_SQL_PATH/spatial_ref_sys.sql -U postgres
@@ -168,3 +189,41 @@ psql -d template_postgis -c "GRANT ALL ON spatial_ref_sys TO PUBLIC;" -U postgre
 createuser -s -P geoanalytics  -U postgres
 createdb -T template_postgis geoanalytics -U geoanalytics
 
+fi
+
+echo "Do you want to setup MongoDB on this machine [y/n]? "
+echo "At least one MongoDB instance will be needed.  This is the most basic"
+echo "setup for MongoDB.  For a clustered MongoDB, see the documentation on"
+echo "http://mongodb.org"
+echo ""
+read setup_mongo
+
+if [ $setup_mongo == 'y' ] || [ $setup_mongo == 'Y' ]; then
+
+chkconfig --add mongod
+chkconfig mongod on
+/etc/init.d/mongod start
+
+fi
+
+echo "Do you want to setup the task queue broker on this machine [y/n]? "
+echo "You will need exactly one task queue broker if you are using the Celery"
+echo "task queue.  It is recommended that you setup a broker on one machine"
+echo ""
+read setup_broker
+
+if [ $setup_broker == 'y' ] || [ $setup_broker == 'Y' ]; then 
+
+chkconfig --add rabbitmq-server
+chkconfig rabbitmq-server on
+/etc/init.d/rabbitmq-server start
+
+rabbitmqctl add_user geoanalytics geoanalytics
+rabbitmqctl add_vhost ga
+rabbitmqctl set_permissions -p ga geoanalytics ".*" ".*" ".*"
+
+fi
+
+echo ""
+echo "System setup complete!"
+echo ""

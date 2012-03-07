@@ -16,7 +16,7 @@
 
 prog="supervisord"
 
-prefix="/usr/local"
+prefix="/usr"
 exec_prefix="${prefix}"
 prog_bin="${exec_prefix}/bin/supervisord"
 PIDFILE="/var/run/$prog.pid"
