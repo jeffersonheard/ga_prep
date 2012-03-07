@@ -224,6 +224,9 @@ rabbitmqctl set_permissions -p ga geoanalytics ".*" ".*" ".*"
 
 fi
 
+/etc/init.d/nginx start
+/etc/init.d/supervisord start
+
 echo ""
 echo "System setup complete!"
 echo ""
