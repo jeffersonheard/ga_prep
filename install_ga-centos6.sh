@@ -21,7 +21,7 @@ read install_rpms
 
 if [ $install_rpms == "y" ] || [ $install_rpms == "Y" ]; then
 # install RPMs
-	rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-5.noarch.rpm
+	rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-7.noarch.rpm
 	rpm -Uvh http://elgis.argeo.org/repos/6/elgis-release-6-6_0.noarch.rpm
 	yum -y update
 	yum -y groupinstall "Development Tools"
